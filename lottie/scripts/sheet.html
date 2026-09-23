@@ -1,0 +1,37 @@
+<html><body style="margin:0;background:#333;color:#fff;font:14px sans-serif"><div id="st">rendering</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+<script>
+// ?files=a.json,b.json&n=6 (frames evenly) or &fr=0,30,..  &s=cell size &out=name.png
+const q=new URLSearchParams(location.search);
+const files=q.get('files').split(','), S=+(q.get('s')||160), out=q.get('out');
+(async()=>{
+  const rows=[];
+  for(const f of files){
+    const a=await (await fetch(f+'?v='+Date.now(),{cache:'no-store'})).json();
+    const n=+(q.get('n')||6);
+    const frs=q.get('fr')?q.get('fr').split(',').map(Number):[...Array(n)].map((_,i)=>Math.round(a.ip+(a.op-a.ip)*i/n));
+    const div=document.createElement('div');div.style=`width:${S}px;height:${S}px;position:absolute;left:-9999px`;document.body.appendChild(div);
+    const cv=[];
+    const an=lottie.loadAnimation({container:div,renderer:'svg',loop:false,autoplay:false,animationData:a});
+    await new Promise(r=>an.addEventListener('DOMLoaded',r));
+    const svg=div.querySelector('svg');
+    for(const fr of frs){
+      an.goToAndStop(fr-a.ip,true);
+      const xml=new XMLSerializer().serializeToString(svg);
+      const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
+      await img.decode();cv.push([fr,img]);
+    }
+    an.destroy();div.remove();rows.push([f.split('/').pop(),cv]);
+  }
+  const per=Math.max(...rows.map(r=>r[1].length));
+  const cells=[];rows.forEach(([name,cv])=>{cv.forEach(([fr,img],x)=>cells.push([x==0?name+' '+fr:''+fr,img]));for(let k=cv.length;k<per;k++)cells.push(null)});
+  const cols=+(q.get('cols')||per), nr=Math.ceil(cells.length/cols);
+  const C=document.createElement('canvas');C.width=cols*S;C.height=nr*S;const g=C.getContext('2d');
+  cells.forEach((c,i)=>{const x=i%cols,y=Math.floor(i/cols);if(!c)return;
+    g.fillStyle=((x+y)%2)?'#8a8a8a':'#9a9a9a';g.fillRect(x*S,y*S,S,S);
+    g.drawImage(c[1],x*S,y*S,S,S);g.fillStyle='#000';g.font='bold 13px sans-serif';g.fillText(c[0],x*S+3,y*S+13);});
+  const blob=await new Promise(r=>C.toBlob(r,'image/png'));
+  await fetch('/save?name='+out,{method:'POST',body:blob});
+  document.getElementById('st').textContent='done '+out;
+})().catch(e=>{document.getElementById('st').textContent='ERR '+e});
+</script></body></html>
