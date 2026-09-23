@@ -1,0 +1,19 @@
+<html><body style="margin:0"><div id="st">rendering</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+<script>
+const q=new URLSearchParams(location.search), f=q.get('f'), S=+q.get('s'), step=+(q.get('step')||2), out=q.get('out');
+(async()=>{
+  const a=await (await fetch(f+'?v='+Date.now(),{cache:'no-store'})).json();
+  const div=document.createElement('div');div.style=`width:${S}px;height:${S}px;position:absolute;left:-9999px`;document.body.appendChild(div);
+  const an=lottie.loadAnimation({container:div,renderer:'svg',loop:false,autoplay:false,animationData:a});
+  await new Promise(r=>an.addEventListener('DOMLoaded',r));
+  const svg=div.querySelector('svg'); const frs=[]; for(let t=a.ip;t<a.op;t+=step) frs.push(t);
+  const C=document.createElement('canvas');C.width=S*frs.length;C.height=S;const g=C.getContext('2d');
+  for(let i=0;i<frs.length;i++){an.goToAndStop(frs[i]-a.ip,true);
+    const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(svg));
+    await img.decode();g.drawImage(img,i*S,0,S,S);}
+  const blob=await new Promise(r=>C.toBlob(r,'image/png'));
+  await fetch('/save?name='+out,{method:'POST',body:blob});
+  document.getElementById('st').textContent='done '+frs.length;
+})().catch(e=>{document.getElementById('st').textContent='ERR '+e});
+</script></body></html>

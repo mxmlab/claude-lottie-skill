@@ -8,8 +8,10 @@ A [Claude Code](https://claude.com/claude-code) skill for creating and improving
 **Contour morphing** — happy-arc eyes, eyelids, an opening mouth with teeth and tongue, bends, "boiling" surfaces.<br>
 **Fake-3D head turns** — one deformation field for the whole head, features shift with parallax.<br>
 **World-space cel lighting** — hard shadow terminator, bounce light, highlights on glossy parts; the light stays put while parts rotate.<br>
+**Pseudo-3D objects** — turntable of a real 3D model with perspective, multi-band metal gradients, gradient outlines, shaded tubes and seamless occlusion (Telegram-gift style).<br>
+**From scratch** — describe a character, get an editable SVG and the animated Lottie from the same data.<br>
 **FX** — sparkles, steam, tapered motion streaks, glows, ballistic tears.<br>
-**Verification** — Telegram limits check, storyboard rendering to PNG, jerk metric, loop-seam check.
+**Verification** — Telegram limits check, storyboard rendering to PNG, jerk metric, frame-diff pop finder, loop-seam check.
 
 <br clear="left"/>
 
@@ -32,6 +34,8 @@ Requires Python 3.10+ and internet access (the storyboard renderer loads lottie-
 mkdir work && cd work
 python ../lottie/scripts/unpack.py ../demo/src/*.tgs
 PYTHONPATH=../lottie/scripts python ../lottie/scripts/examples/finger_rig_3d_light.py out_pack
+# no source needed for these two:
+PYTHONPATH=../lottie/scripts:../lottie/scripts/examples python ../lottie/scripts/examples/lamp_turntable_3d.py out_pack
 ```
 
 The result is `out_pack/finger.tgs`. For a storyboard, run `python ../lottie/scripts/srv.py` and open
@@ -46,6 +50,8 @@ The result is `out_pack/finger.tgs`. For a storyboard, run `python ../lottie/scr
 | `finger_rig_3d_light.py` | `finger.tgs` | finger unfolding joint by joint, eyelids, tongue, 3D head turn, lighting |
 | `laugh_mouth_hands.py` | `HEHEHE.tgs` | laughing: open mouth, rigid 3D hands, tears |
 | `enhance_existing_stars.py` | `KLASS.tgs` | polishing an existing animation: the stars |
+| `lamp_turntable_3d.py` | — (built from code) | rotating magic lamp: 3D model, gold gradients, shaded spout & handle, occlusion |
+| `aladdin_design.py` + `aladdin_flying.py` | — (built from a description) | Funko-style character drawn as data → `aladdin.svg` + flying/smiling animation |
 
 Character art © mxmlab, included for demo purposes only.
 
